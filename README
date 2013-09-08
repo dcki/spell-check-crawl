@@ -1,0 +1,5 @@
+crawl.rb relies on 2 dictionary files.
+
+For the primary dictionary it attempts to read from the unix words file in /usr/share/dict/words. If you don't have this dictionary, I think it's probably fine to grab a copy of it from a Linux distribution.
+
+The custom dictionary, ./custom_dictionary, contains words added by users of the script - words that are not found in the 'words' dictionary, that the script would identify as misspelled.

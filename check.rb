@@ -1,20 +1,34 @@
-# Author: David Winiecki
-# Project started September 2013
-
+# Copyright 2013 David Winiecki
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# The first version of this script was completed in September 2013.
+#
 # This spell checker ignores all punctuation, including hyphens, and treats hyphenated words as separate words.
 # This script does not check grammar, only spelling.
 # This script is designed only to check English. Extending it for other languages, even similar languages like French or German, would be a LOT of work. I know from experience. (However, Spanish might be easier for all I know.)
-# This script does not check if capitalization is correct. 'aNd' is treated exactly the same as 'and' or 'And'.
+# This script does not check case, as in uppercase or lowercase. 'aNd' is treated exactly the same as 'and' or 'And'.
 # If this script finds a word in the dictionary or custom_dictionary, it is identified as correctly spelled. If a word is not found in either dictionary, the word is recorded as misspelled.
 
 # To do:
-# Implement highlight_word, misspelled?, and read_dictionaries.
 # Make it easier to add words to the custom dictionary.
 
 # For more about anemone see http://anemone.rubyforge.org/information-and-examples.html
 require 'anemone'
 # For more about Selenium WebDriver, see http://docs.seleniumhq.org/docs/03_webdriver.jsp#introducing-the-selenium-webdriver-api-by-example
 require 'selenium-webdriver'
+require 'set'
 
 def get_options()
   # To do: get command line options here or input from stdin for website domain or page.
@@ -30,8 +44,8 @@ def get_options()
   @span_style = "border: solid magenta 2px; background-color: yellow;"
 
   # To do:
-  # Any word that is all caps should be skipped, never identified as an error.
-  # @ignore_capitalization = 
+  # If true, any word that is all caps should be skipped, never identified as an error.
+  # @ignore_capitalization = true
 
   # To do: Make this an option:
   # Maximum number of pages this script will attempt to open with Selenium-WebDriver at one time.
@@ -49,13 +63,19 @@ def initialize_log
 end
 
 def read_dictionaries
+  @dict = File.read('/usr/share/dict/words').lines.to_a
+  @dict.each { |line| line.strip! }
+  @dict = Set.new @dict
 
+  custom_dict = File.read('custom_dictionary').lines.to_a
+  custom_dict.each do |line|
+    line.strip!
+    @dict << line
+  end
 end
 
 def misspelled?(word)
-
-  return true
-
+  return !(@dict.include? word.downcase)
 end
 
 # If page contains errors in innerHTML text, add page and error words to @errors.
@@ -133,10 +153,50 @@ end
 def open_and_highlight(url)
   words = @errors[url]
   @driver.get url
-  words.each { |word| highlight_word word }
+  # DEBUG
+  # words.each { |word| highlight_word word }
+  highlight_word 'Wikipedia'
+  highlight_word 'encyclopediaa'
+  highlight_word 'lang'
+  highlight_word 'ckb'
+  highlight_word 'kk'
+  highlight_word 'arab'
+  highlight_word 'mzn'
+  highlight_word 'ps'
+  highlight_word 'enwiki'
+  highlight_word 'resourceloader'
+  highlight_word 'css'
+  highlight_word 'fdea'
+  highlight_word 'ed'
+  highlight_word 'articles'
+  highlight_word 'English'
+  highlight_word 'Arts'
+  highlight_word 'portals'
+  highlight_word 'SummerSlam'
+  highlight_word 'WWE'
+  highlight_word 'America'
+  highlight_word 'Arizona'
+  highlight_word 'wrestlers'
+  highlight_word 'SmackDown'
+  highlight_word 'brands'
+  highlight_word 'matches'
+  highlight_word 'defeated'
+  highlight_word 'Chris'
+  highlight_word 'Jericho'
+  highlight_word 'Goldberg'
+  highlight_word 'Kevin'
+  highlight_word 'Orton'
+  highlight_word 'Shawn'
+  highlight_word 'Michaels'
+  highlight_word 'featuring'
+  highlight_word 'defending'
+  highlight_word 'Kurt'
+  highlight_word 'Lesnar'
+  highlight_word 'Holds'
+  highlight_word 'Kane'
 end
 
-def page_to_str(url)
+def page_to_s(url)
   "#{url}: #{@errors[url].join ', '}"
 end
 
@@ -148,7 +208,6 @@ def crawl()
         puts page.url
         record_page_errors page
         if page_has_errors? page then
-          #puts page_to_str page.url
           puts '|'
         else
           puts '-'
@@ -177,12 +236,11 @@ def review
     display_urls << url
   end
 
-
   quit = false
 
   until quit
     (0..display_urls.length-1).each do |i|
-      puts "#{i} #{display_urls[i]}"
+      puts "#{i} #{page_to_s(display_urls[i])}\n\n"
     end
     puts "Type a number to review the errors on that page, or 'q' to quit."
     # To do: make it possible to open and highlight all pages at once.
