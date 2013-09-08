@@ -103,34 +103,13 @@ def record_page_errors(page)
   page.doc.css('script, link').each { |node| node.remove }
   body_text = page.doc.text.dup
 
-  # Hack by ecerulm to fix an error ("check.rb:83:in `split': invalid byte sequence in UTF-8 (ArgumentError)").
-  # http://stackoverflow.com/questions/2982677/ruby-1-9-invalid-byte-sequence-in-utf-8#answer-8873922
-  # See also:
-  # http://stackoverflow.com/questions/5131985/why-urllib-returns-garbage-from-some-wikipedia-articles
-  # https://github.com/chriskite/anemone/pull/73
-  #body_text.encode!('UTF-8', 'UTF-8', :invalid => :replace, :replace => '')
-  #body_text.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
-  #body_text.encode!('UTF-8', 'UTF-16')
-  # Replacing hack with better error catching...
-
   # Parse the large string of page text into individual word strings, removing all non-alpha characters.
   words = body_text.split(/[^a-zA-Z]/)
 
   # Remove trailing "'s" from each word.
+  # Probably no longer necessary now that we throw away all non-alphas.
   words.each do |word|
-    # DEBUG
-    # debug_trailing_s = false
-    # if /'s$/ =~ word
-    #   debug_trailing_s = true
-    #   puts word
-    # end
-    # END DEBUG
     word.gsub!(/'s$/, '')
-    # DEBUG
-    # if debug_trailing_s then
-    #   puts word
-    # end
-    # END DEBUG
   end
 
   unique_words = Set.new words
@@ -152,6 +131,8 @@ def page_has_errors?(page)
 end
 
 def load_jQuery
+  # From user megaxelize on stackoverflow.com.
+  # stackoverflow.com/questions/17753655/timeouterror-using-selenium-webdriver-in-ruby#answer-18002146
   @driver.manage.timeouts.implicit_wait = 20
   @driver.manage.timeouts.script_timeout = 20
   @driver.manage.timeouts.page_load = 20
@@ -165,14 +146,8 @@ def load_jQuery
 end
 
 def highlight_word(word)
-  # Credit for the hiliter function goes to Andrew Hedges:
-  # http://stackoverflow.com/questions/119441/highlight-a-word-with-jquery#answer-120161
-  # DEBUG
-  #puts script = "function hiliter(word, element) { var rgxp = new RegExp('[^a-zA-Z]' + word + '[^a-zA-Z]', 'g'); var repl = '<span style=\"#{@span_style}\">' + word + '</span>'; element.innerHTML = element.innerHTML.replace(rgxp, repl); } hiliter('#{word}', document.body);"
-  #@driver.execute_script script
   @hl_class = 'highlight_crawl_spell_check'
   @driver.execute_script "jQuery('body').highlight('#{word}', { className: '#{@hl_class}', wordsOnly: true, caseSensitive: true });"
-  #@driver.execute_script "jQuery('body').highlight('#{word}', { className: '#{@hl_class}', wordsOnly: true, caseSensitive: true });"
   @driver.execute_script "jQuery(\".#{@hl_class}\").css({ #{@span_js_style} });"
 end
 
@@ -244,6 +219,7 @@ def review
     if /^q/ =~ input.downcase then
       quit = true
       break
+      # To do: open all pages at once.
       # elsif /^a/ =~ input.downcase then
       #   puts "Are you sure? This will open ALL PAGES containing errors simeltaneously, in separate windows. (y/n)"
       #   if /^y/ =~ gets.downcase != nil then
