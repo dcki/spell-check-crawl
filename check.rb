@@ -30,7 +30,7 @@ require 'anemone'
 require 'selenium-webdriver'
 require 'set'
 
-def get_options()
+def get_options
   # To do: get command line options here or input from stdin for website domain or page.
   @domain = "http://en.wikipedia.org/"
 
@@ -41,15 +41,25 @@ def get_options()
   # @input_log = 
 
   # To do: get style for highlighting <span> elements from command line if default style is not desirable.
-  @span_style = "border: solid magenta 2px; background-color: yellow;"
+  # The style information must be in the syntax jQuery expects. This is different from CSS!!
+  @span_js_style = 'border: "solid magenta 2px", backgroundColor: "yellow"'
 
   # To do:
   # If true, any word that is all caps should be skipped, never identified as an error.
   # @ignore_capitalization = true
 
+  # Limit the crawl to just a few pages. Raise the number to crawl more pages. Set to nil to disable.
+  @limit_crawl = 2
+  # @limit_crawl = nil
+
   # To do: Make this an option:
   # Maximum number of pages this script will attempt to open with Selenium-WebDriver at one time.
   @page_open_max = 50
+
+  @load_jQuery_script_file = 'jQuerify.js'
+  @load_script_file = 'load_js_file.js'
+  @jQuery_file = 'jquery-2.0.3.min.js'
+  @highlight_file = 'jquery.highlight.js'
 end
 
 def initialize_log
@@ -141,66 +151,45 @@ def page_has_errors?(page)
   return @errors[page.url]
 end
 
+def load_jQuery
+  @driver.manage.timeouts.implicit_wait = 20
+  @driver.manage.timeouts.script_timeout = 20
+  @driver.manage.timeouts.page_load = 20
+
+  # Load jQuery
+  @driver.execute_async_script(File.read(@load_jQuery_script_file), @jQuery_file)
+
+  # Load jQuery highlighter plugin
+  #@driver.execute_async_script(File.read(@load_script_file), @highlight_file)
+  @driver.execute_script(File.read(@highlight_file))
+end
+
 def highlight_word(word)
   # Credit for the hiliter function goes to Andrew Hedges:
   # http://stackoverflow.com/questions/119441/highlight-a-word-with-jquery#answer-120161
-  # puts script = "function hiliter(word, element) { var rgxp = new RegExp(word, 'g'); var repl = '<span style=\"#{@span_style}\">' + word + '</span>'; element.innerHTML = element.innerHTML.replace(rgxp, repl); } hiliter("#{word}", document.body);"
-  # puts script = "function hiliter(rgxp, element) { /*var rgxp = new RegExp(word, 'g');*/ var repl = '<span style=\"#{@span_style}\">' + word + '</span>'; element.innerHTML = element.innerHTML.replace(rgxp, repl); } hiliter(/[^a-zA-Z]#{word}[^a-zA-Z]/g, document.body);"
-  puts script = "function hiliter(word, element) { var rgxp = new RegExp('[^a-zA-Z]' + word + '[^a-zA-Z]', 'g'); var repl = '<span style=\"#{@span_style}\">' + word + '</span>'; element.innerHTML = element.innerHTML.replace(rgxp, repl); } hiliter('#{word}', document.body);"
-  @driver.execute_script script
+  # DEBUG
+  #puts script = "function hiliter(word, element) { var rgxp = new RegExp('[^a-zA-Z]' + word + '[^a-zA-Z]', 'g'); var repl = '<span style=\"#{@span_style}\">' + word + '</span>'; element.innerHTML = element.innerHTML.replace(rgxp, repl); } hiliter('#{word}', document.body);"
+  #@driver.execute_script script
+  @hl_class = 'highlight_crawl_spell_check'
+  @driver.execute_script "jQuery('body').highlight('#{word}', { className: '#{@hl_class}', wordsOnly: true, caseSensitive: true });"
+  #@driver.execute_script "jQuery('body').highlight('#{word}', { className: '#{@hl_class}', wordsOnly: true, caseSensitive: true });"
+  @driver.execute_script "jQuery(\".#{@hl_class}\").css({ #{@span_js_style} });"
 end
 
 def open_and_highlight(url)
   words = @errors[url]
   @driver.get url
-  # DEBUG
-  # words.each { |word| highlight_word word }
-  highlight_word 'Wikipedia'
-  highlight_word 'encyclopediaa'
-  highlight_word 'lang'
-  highlight_word 'ckb'
-  highlight_word 'kk'
-  highlight_word 'arab'
-  highlight_word 'mzn'
-  highlight_word 'ps'
-  highlight_word 'enwiki'
-  highlight_word 'resourceloader'
-  highlight_word 'css'
-  highlight_word 'fdea'
-  highlight_word 'ed'
-  highlight_word 'articles'
-  highlight_word 'English'
-  highlight_word 'Arts'
-  highlight_word 'portals'
-  highlight_word 'SummerSlam'
-  highlight_word 'WWE'
-  highlight_word 'America'
-  highlight_word 'Arizona'
-  highlight_word 'wrestlers'
-  highlight_word 'SmackDown'
-  highlight_word 'brands'
-  highlight_word 'matches'
-  highlight_word 'defeated'
-  highlight_word 'Chris'
-  highlight_word 'Jericho'
-  highlight_word 'Goldberg'
-  highlight_word 'Kevin'
-  highlight_word 'Orton'
-  highlight_word 'Shawn'
-  highlight_word 'Michaels'
-  highlight_word 'featuring'
-  highlight_word 'defending'
-  highlight_word 'Kurt'
-  highlight_word 'Lesnar'
-  highlight_word 'Holds'
-  highlight_word 'Kane'
+  
+  load_jQuery
+  
+  words.each { |word| highlight_word word }
 end
 
 def page_to_s(url)
   "#{url}: #{@errors[url].join ', '}"
 end
 
-def crawl()
+def crawl
   @errors = { }
   Anemone.crawl(@domain) do |anemone|
     anemone.on_every_page do |page|
@@ -226,7 +215,10 @@ def crawl()
       end
     end
     # Limit crawl to just a couple pages.
-    anemone.focus_crawl { |page| page.links.slice(0..1) }
+    # DEBUG
+    if @limit_crawl then
+      anemone.focus_crawl { |page| page.links.slice(0..@limit_crawl) }
+    end
   end
 end
 
