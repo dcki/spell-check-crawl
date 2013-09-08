@@ -1,6 +1,9 @@
 /*
  * jQuery Highlight plugin
  *
+ * Note from David Winiecki: see also
+ * http://bartaz.github.io/sandbox.js/jquery.highlight.html
+ *
  * Based on highlight v3 by Johann Burkard
  * http://johannburkard.de/blog/programming/javascript/highlight-javascript-text-higlighting-jquery-plugin.html
  *
