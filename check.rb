@@ -49,7 +49,7 @@ def get_options
   # @ignore_capitalization = true
 
   # Limit the crawl to just a few pages. Raise the number to crawl more pages. Set to nil to disable.
-  @limit_crawl = 2
+  @limit_crawl = 0
   # @limit_crawl = nil
 
   # To do: Make this an option:
@@ -250,4 +250,7 @@ read_dictionaries
 @driver = Selenium::WebDriver.for :firefox
 crawl
 review
-@driver.quit
+begin
+  @driver.quit
+rescue Errno::ECONNREFUSED # If the browser window was already closed, ignore this error.
+end
