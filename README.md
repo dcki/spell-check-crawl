@@ -25,7 +25,8 @@ Setup
 Usage
 -----
 
-    # Run the check.rb script with Ruby. Type the URL of the website to check last. Defaults to http if not specified.
+Run the check.rb script with Ruby. Protocol defaults to http if not specified.
+
     ruby check.rb https://example.com
 
 
