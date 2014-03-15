@@ -4,7 +4,7 @@ Spell check crawl
 Setup
 -----
 
-    # Open Terminal.
+Open Terminal.
     
     # If you want to use rvm for Ruby version management (recommended) install it.
     \curl -sSL https://get.rvm.io | bash -s stable
