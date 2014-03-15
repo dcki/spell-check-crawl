@@ -47,7 +47,7 @@ If this script finds a word in one of the dictionary files, it is identified as 
 Dictionary files
 ----------------
 
-check.rb relies on 3 dictionary files. The first two are from Ubuntu and Firefox and stored in the lib directory. Additional words that should be ignored can be added to the custom dictionary file.
+spell-check-crawl.rb relies on 3 dictionary files. The first two are from Ubuntu and Firefox and stored in the lib directory. Additional words that should be ignored can be added to the custom dictionary file.
 
 
 Help
