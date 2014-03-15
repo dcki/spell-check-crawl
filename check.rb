@@ -43,12 +43,12 @@ def get_options
   # @ignore_all_caps = true
 
   # Limit the crawl to just a few pages. Raise the number to crawl more pages. Set to nil to disable.
-  @limit_crawl = 0
+  @limit_crawl = 1
   # @limit_crawl = nil
 
   # To do: Make this an option:
   # Maximum number of pages this script will attempt to open with Selenium-WebDriver at one time.
-  @page_open_max = 50
+  #@page_open_max = 50
 
   @load_jQuery_script_file = 'lib/jQuerify.js'
   @load_script_file = 'lib/load_js_file.js'
