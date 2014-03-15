@@ -4,29 +4,29 @@ Spell check crawl
 Setup
 -----
 
-\# Open Terminal.
-
-\# If you want to use rvm for Ruby version management (recommended) install it.
-\curl -sSL https://get.rvm.io | bash -s stable
-
-\# Clone this project.
-git clone ssh://git@github.com:Vinietskyzilla/spell-check-crawl.git
-
-\# Change to the spell-check-crawl directory.
-cd spell-check-crawl
-
-\# Install the bundler gem.
-gem install bundler
-
-\# Install all the other gem dependencies. (Reads gem dependencies from Gemfile.lock.)
-bundle install
+    # Open Terminal.
+    
+    # If you want to use rvm for Ruby version management (recommended) install it.
+    \curl -sSL https://get.rvm.io | bash -s stable
+    
+    # Clone this project.
+    git clone ssh://git@github.com:Vinietskyzilla/spell-check-crawl.git
+    
+    # Change to the spell-check-crawl directory.
+    cd spell-check-crawl
+    
+    # Install the bundler gem.
+    gem install bundler
+    
+    # Install all the other gem dependencies. (Reads gem dependencies from Gemfile.lock.)
+    bundle install
 
 
 Usage
 -----
 
-\# Run the check.rb script with Ruby. Type the URL of the website to check last. Defaults to http if not specified.
-ruby check.rb https://example.com
+    # Run the check.rb script with Ruby. Type the URL of the website to check last. Defaults to http if not specified.
+    ruby check.rb https://example.com
 
 
 Script behavior, specs
