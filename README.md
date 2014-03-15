@@ -25,9 +25,9 @@ Open Terminal.
 Usage
 -----
 
-Run the check.rb script with Ruby. Protocol defaults to http if not specified.
+Run the spell-check-crawl.rb script with Ruby. Protocol defaults to http if not specified.
 
-    ruby check.rb https://example.com
+    ruby spell-check-crawl.rb -u https://example.com
 
 
 Script behavior, specs

@@ -18,6 +18,7 @@ GEM
       multi_json (~> 1.0)
       rubyzip (~> 1.0)
       websocket (~> 1.0.4)
+    trollop (2.0)
     websocket (1.0.7)
 
 PLATFORMS
@@ -26,3 +27,4 @@ PLATFORMS
 DEPENDENCIES
   anemone (~> 0.7.2)
   selenium-webdriver (~> 2.40.0)
+  trollop (~> 2.0)

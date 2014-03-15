@@ -22,11 +22,31 @@
 require 'anemone'
 # For more about Selenium WebDriver, see http://docs.seleniumhq.org/docs/03_webdriver.jsp#introducing-the-selenium-webdriver-api-by-example
 require 'selenium-webdriver'
+require 'trollop'
 require 'set'
 
 def get_options
-  # To do: get command line options here or input from stdin for website domain or page.
-  @domain = "http://en.wikipedia.org/"
+
+  opts = Trollop::options do
+    banner <<-EOS
+
+Crawl a website then highlight spelling errors.
+
+Usage:
+
+ruby spell-check-crawl.rb -u example.com
+EOS
+    opt :url, "URL of site to crawl. Protocol defaults to http if not specified.", :type => :string
+    opt :limit, "An integer. Will crawl fewer pages if the number is small. Crawls whole site by default.", :type => :int, :default => nil
+  end
+  unless opts[:url]
+    Trollop::die :url, "is required"
+  end
+
+  @domain = opts[:url]
+  unless @domain ~= /^https?:\/\//
+    @domain = 'http://' + @domain
+  end
 
   # To do: make it possible to spell check a single page.
   # @page = 
@@ -43,7 +63,7 @@ def get_options
   # @ignore_all_caps = true
 
   # Limit the crawl to just a few pages. Raise the number to crawl more pages. Set to nil to disable.
-  @limit_crawl = 1
+  @limit_crawl = opts[:limit]
   # @limit_crawl = nil
 
   # To do: Make this an option:
@@ -89,7 +109,7 @@ def read_dictionaries
 end
 
 def misspelled?(word)
-  return !(@dict.include? word.downcase)
+  return !(@dict.include?(word) || @dict.include?(word.downcase))
 end
 
 # If page contains errors in innerHTML text, add page and error words to @errors.
