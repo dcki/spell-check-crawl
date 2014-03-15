@@ -14,12 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # The first version of this script was completed in September 2013.
-#
-# This spell checker ignores all punctuation, including hyphens, and treats hyphenated words as separate words.
-# This script does not check grammar, only spelling.
-# This script is designed only to check English. Extending it for other languages, even similar languages like French or German, would be a LOT of work. I know from experience. (However, Spanish might be easier for all I know.)
-# This script does not check case, as in uppercase or lowercase. 'aNd' is treated exactly the same as 'and' or 'And'.
-# If this script finds a word in the dictionary or custom_dictionary, it is identified as correctly spelled. If a word is not found in either dictionary, the word is recorded as misspelled.
 
 # To do:
 # Make it easier to add words to the custom dictionary.
@@ -41,12 +35,12 @@ def get_options
   # @input_log = 
 
   # To do: get style for highlighting <span> elements from command line if default style is not desirable.
-  # The style information must be in the syntax jQuery expects. This is different from CSS!!
+  # The style information must use the syntax jQuery expects. This is different from CSS!!
   @span_js_style = 'border: "solid magenta 2px", backgroundColor: "yellow"'
 
   # To do:
   # If true, any word that is all caps should be skipped, never identified as an error.
-  # @ignore_capitalization = true
+  # @ignore_all_caps = true
 
   # Limit the crawl to just a few pages. Raise the number to crawl more pages. Set to nil to disable.
   @limit_crawl = 0
@@ -56,10 +50,10 @@ def get_options
   # Maximum number of pages this script will attempt to open with Selenium-WebDriver at one time.
   @page_open_max = 50
 
-  @load_jQuery_script_file = 'jQuerify.js'
-  @load_script_file = 'load_js_file.js'
-  @jQuery_file = 'jquery-2.0.3.min.js'
-  @highlight_file = 'jquery.highlight.js'
+  @load_jQuery_script_file = 'lib/jQuerify.js'
+  @load_script_file = 'lib/load_js_file.js'
+  @jQuery_file = 'lib/jquery-2.0.3.min.js'
+  @highlight_file = 'lib/jquery.highlight.js'
 end
 
 def initialize_log
@@ -73,9 +67,19 @@ def initialize_log
 end
 
 def read_dictionaries
-  @dict = File.read('/usr/share/dict/words').lines.to_a
-  @dict.each { |line| line.strip! }
-  @dict = Set.new @dict
+  @dict = Set.new
+
+  linux_dict = File.read('lib/ubuntu_12_04_usr_share_dict_words_american_english').lines.to_a
+  linux_dict.each do |line|
+    line.strip!
+    @dict << line
+  end
+
+  firefox_dict = File.read('lib/en-US-from-Firefox.dic').lines.to_a
+  firefox_dict.each do |line|
+    line.strip!
+    @dict << line
+  end
 
   custom_dict = File.read('custom_dictionary').lines.to_a
   custom_dict.each do |line|
@@ -160,7 +164,7 @@ def open_and_highlight(url)
   words.each { |word| highlight_word word }
 end
 
-def page_to_s(url)
+def page_errors_string(url)
   "#{url}: #{@errors[url].join ', '}"
 end
 
@@ -207,7 +211,7 @@ def review
 
   until quit
     (0..display_urls.length-1).each do |i|
-      puts "#{i} #{page_to_s(display_urls[i])}\n\n"
+      puts "#{i} #{page_errors_string(display_urls[i])}\n\n"
     end
     puts "Type a number to review the errors on that page, or 'q' to quit."
     # To do: make it possible to open and highlight all pages at once.
