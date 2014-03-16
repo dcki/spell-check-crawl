@@ -1,6 +1,8 @@
 Spell check crawl
 =================
 
+![Screenshot of highlighted spelling errors on Wikipedia, including a false positive](wikipedia_screenshot.png)
+
 Setup
 -----
 
