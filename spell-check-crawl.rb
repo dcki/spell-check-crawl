@@ -44,7 +44,7 @@ EOS
   end
 
   @domain = opts[:url]
-  unless @domain ~= /^https?:\/\//
+  unless @domain =~ /^https?:\/\//
     @domain = 'http://' + @domain
   end
 
@@ -162,7 +162,8 @@ def load_jQuery
   @driver.manage.timeouts.page_load = 20
 
   # Load jQuery
-  @driver.execute_async_script(File.read(@load_jQuery_script_file), @jQuery_file)
+  #@driver.execute_async_script(File.read(@load_jQuery_script_file), @jQuery_file)
+  @driver.execute_script(File.read(@jQuery_file))
 
   # Load jQuery highlighter plugin
   #@driver.execute_async_script(File.read(@load_script_file), @highlight_file)
@@ -192,25 +193,27 @@ def crawl
   @errors = { }
   Anemone.crawl(@domain) do |anemone|
     anemone.on_every_page do |page|
-      begin
-        puts page.url
-        record_page_errors page
-        if page_has_errors? page then
-          puts '|'
-        else
-          puts '-'
-        end
-      rescue => e
-        puts 'BEGIN ERROR'
+      unless page.url.to_s =~ /\.(jpg|gif|png)$/
         begin
-          puts "Error processing #{page.url}: #{e}"
-          puts e.backtrace[0..2]
-        rescue => e2
-          puts "Error processing page: #{e}"
-          puts e.backtrace[0..2]
-          puts "(Page url not availabe due to further error: #{e2})"
+          puts page.url
+          record_page_errors page
+          if page_has_errors? page then
+            puts '|'
+          else
+            puts '-'
+          end
+        rescue => e
+          puts 'BEGIN ERROR'
+          begin
+            puts "Error processing #{page.url}: #{e}"
+            puts e.backtrace[0..2]
+          rescue => e2
+            puts "Error processing page: #{e}"
+            puts e.backtrace[0..2]
+            puts "(Page url not availabe due to further error: #{e2})"
+          end
+          puts 'END ERROR'
         end
-        puts 'END ERROR'
       end
     end
     # Limit crawl to just a couple pages.
