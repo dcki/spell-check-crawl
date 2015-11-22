@@ -12,7 +12,7 @@ Open Terminal.
     \curl -sSL https://get.rvm.io | bash -s stable
     
     # Clone this project.
-    git clone ssh://git@github.com:Vinietskyzilla/spell-check-crawl.git
+    git clone ssh://git@github.com:dcki/spell-check-crawl.git
     
     # Change to the spell-check-crawl directory.
     cd spell-check-crawl
